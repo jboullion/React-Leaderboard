@@ -1,5 +1,4 @@
 function ListItem(props) {
-	// Correct! There is no need to specify the key here:
 	return <li>{props.value}</li>;
 }
 
@@ -29,25 +28,13 @@ class App extends React.Component {
 	}
 
 	componentWillMount(){
-		var //recent = {},
-			//alltime = {},
-			app = this;
+		var app = this;
 
 		//strangly, the recent and alltime URLS return the same users, just ordered differently.
 		//So we only need one call to get all the data
 		axios.get('https://fcctop100.herokuapp.com/api/fccusers/top/recent')
 		.then(function (response) {
-			//recent = response;
 			app.setUsers(response);
-
-			/*
-			axios.get('https://fcctop100.herokuapp.com/api/fccusers/top/alltime')
-			.then(function (response) {
-				alltime = response;
-				app.setUsers(recent,alltime);
-
-			});
-			*/
 		});
 
 	}

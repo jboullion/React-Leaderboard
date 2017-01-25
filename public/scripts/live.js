@@ -9,7 +9,7 @@ function _possibleConstructorReturn(self, call) { if (!self) { throw new Referen
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
 function UserRow(props) {
-	console.log(props);
+
 	return React.createElement(
 		"tr",
 		null,
@@ -53,6 +53,26 @@ function UserRows(props) {
 	);
 }
 
+function capitalize(string) {
+	return string.charAt(0).toUpperCase() + string.slice(1);
+}
+
+function SortHeader(props) {
+	var sortName = capitalize(props.sort);
+	var classes = "sort-by";
+	if (props.sort === props.sortBy) {
+		classes += " " + props.order;
+	}
+	return React.createElement(
+		"th",
+		{ id: "sort-" + props.sort, className: classes, onClick: function onClick() {
+				return props.onClick(props.sort);
+			} },
+		sortName,
+		" Points"
+	);
+}
+
 var App = function (_React$Component) {
 	_inherits(App, _React$Component);
 
@@ -62,7 +82,9 @@ var App = function (_React$Component) {
 		var _this = _possibleConstructorReturn(this, (App.__proto__ || Object.getPrototypeOf(App)).call(this));
 
 		_this.state = {
-			users: []
+			users: [],
+			sortBy: 'recent',
+			order: 'asc'
 		};
 		return _this;
 	}
@@ -70,8 +92,8 @@ var App = function (_React$Component) {
 	_createClass(App, [{
 		key: "setUsers",
 		value: function setUsers(response) {
+			//console.log(response.data);
 			this.setState({ users: response.data });
-			console.log(this.state);
 		}
 	}, {
 		key: "componentWillMount",
@@ -85,8 +107,39 @@ var App = function (_React$Component) {
 			});
 		}
 	}, {
+		key: "handleClick",
+		value: function handleClick(sort) {
+			var newOrder = 'asc' === this.state.order ? 'desc' : 'asc';
+			var sortedUsers = [];
+			if (newOrder === 'asc') {
+				if (sort === 'recent') {
+					sortedUsers = this.state.users.sort(function (a, b) {
+						return b.recent - a.recent;
+					});
+				} else {
+					sortedUsers = this.state.users.sort(function (a, b) {
+						return b.alltime - a.alltime;
+					});
+				}
+			} else {
+				if (sort === 'recent') {
+					sortedUsers = this.state.users.sort(function (a, b) {
+						return a.recent - b.recent;
+					});
+				} else {
+					sortedUsers = this.state.users.sort(function (a, b) {
+						return a.alltime - b.alltime;
+					});
+				}
+			}
+
+			this.setState({ users: sortedUsers, sortBy: sort, order: newOrder });
+		}
+	}, {
 		key: "render",
 		value: function render() {
+			var _this2 = this;
+
 			return React.createElement(
 				"table",
 				{ id: "App" },
@@ -106,16 +159,20 @@ var App = function (_React$Component) {
 							null,
 							"Camper Name"
 						),
-						React.createElement(
-							"th",
-							null,
-							"Recent Points"
-						),
-						React.createElement(
-							"th",
-							null,
-							"Alltime Points"
-						)
+						React.createElement(SortHeader, {
+							sort: 'recent',
+							sortBy: this.state.sortBy,
+							order: this.state.order,
+							onClick: function onClick(sort) {
+								return _this2.handleClick(sort);
+							} }),
+						React.createElement(SortHeader, {
+							sort: 'all',
+							sortBy: this.state.sortBy,
+							order: this.state.order,
+							onClick: function onClick(sort) {
+								return _this2.handleClick(sort);
+							} })
 					)
 				),
 				React.createElement(UserRows, { users: this.state.users })
@@ -128,4 +185,4 @@ var App = function (_React$Component) {
 
 // ========================================
 
-ReactDOM.render(React.createElement(App, null), document.getElementById('container'));
+ReactDOM.render(React.createElement(App, null), document.getElementById('app'));
